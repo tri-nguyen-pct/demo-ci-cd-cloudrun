@@ -1,0 +1,71 @@
+name: CI/CD
+
+on:
+  push:
+
+permissions:
+  contents: none
+  id-token: write
+
+env:
+  PROJECT_ID: test-cloud-run-380202
+  SERVICE: test-ci-cd
+  REGION: us-central1
+  INSIDE_PROD_SECRET: ${{ secrets.PROD_SECRET }}
+  INSIDE_PROD_VARIABLE: ${{ vars.PROD_VARIABLE }}
+
+jobs:
+  CI:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+    - name: Install
+      run: npm ci
+    - name: Build
+      run: npm run build
+    - name: Lint
+      run: npm run lint
+    - name: Unit test
+      run: npm run test
+    - name: e2e test
+      run: npm run test:e2e
+
+  CD:
+    runs-on: ubuntu-latest
+    needs:
+      - CI
+    environment: Production
+    if:
+      contains('refs/heads/main', github.ref)
+    steps:
+      - uses: actions/checkout@v3
+      - name: Hello secret
+        run: echo ${{ env.INSIDE_PROD_SECRET }}
+      - name: Hello variable
+        run: echo ${{ env.INSIDE_PROD_VARIABLE }}
+      # - uses: 'google-github-actions/auth@v1'
+      #   with:
+      #     workload_identity_provider: 'projects/524340436549/locations/global/workloadIdentityPools/github-action-4/providers/github-action-provider-4'
+      #     service_account: 'github-action-4@test-cloud-run-380202.iam.gserviceaccount.com'
+
+      # - name: Set up Cloud SDK
+      #   uses: google-github-actions/setup-gcloud@v1
+
+      # - name: Authorize Docker push
+      #   run: gcloud auth configure-docker
+
+      # - name: Build and Push Container
+      #   run: |-
+      #     docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{  github.sha }} .
+      #     docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{  github.sha }}
+
+      # - name: Deploy to Cloud Run
+      #   run: |-
+      #     gcloud run deploy ${{ env.SERVICE }} \
+      #       --region ${{ env.REGION }} \
+      #       --image gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{  github.sha }} \
+      #       --platform "managed" \
+      #       --quiet \
+      #       --allow-unauthenticated

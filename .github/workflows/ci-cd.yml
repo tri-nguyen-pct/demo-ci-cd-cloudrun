@@ -52,14 +52,34 @@ jobs:
         run: |-
           docker build -t gcr.io/${{ env.GCLOUD_PROJECT_ID }}/${{ env.GCLOUD_CLOUDRUN_SERVICE }}:${{  github.sha }} .
           docker push gcr.io/${{ env.GCLOUD_PROJECT_ID }}/${{ env.GCLOUD_CLOUDRUN_SERVICE }}:${{  github.sha }}
+
+      # - id: deploy
+      #   name: Deploy to Cloud Run
+      #   run: |-
+      #     gcloud run deploy ${{ env.GCLOUD_CLOUDRUN_SERVICE }} \
+      #       --region ${{ env.GCLOUD_REGION }} \
+      #       --image gcr.io/${{ env.GCLOUD_PROJECT_ID }}/${{ env.GCLOUD_CLOUDRUN_SERVICE }}:${{  github.sha }} \
+      #       --platform "managed" \
+      #       --quiet \
+      #       --allow-unauthenticated \
+      #       --memory 512M
+
       - id: deploy
         name: Deploy to Cloud Run
-        run: |-
-          gcloud run deploy ${{ env.GCLOUD_CLOUDRUN_SERVICE }} \
-            --region ${{ env.GCLOUD_REGION }} \
-            --image gcr.io/${{ env.GCLOUD_PROJECT_ID }}/${{ env.GCLOUD_CLOUDRUN_SERVICE }}:${{  github.sha }} \
-            --platform "managed" \
-            --quiet \
-            --allow-unauthenticated
-      - name: 'Use output'
+        uses: google-github-actions/deploy-cloudrun@v1
+        with:
+          service: ${{ env.GCLOUD_CLOUDRUN_SERVICE }}
+          image: gcr.io/${{ env.GCLOUD_PROJECT_ID }}/${{ env.GCLOUD_CLOUDRUN_SERVICE }}:${{  github.sha }}
+          region: ${{ env.GCLOUD_REGION }}
+          flags: "--allow-unauthenticated"
+          tag: ${{ github.sha }}
+
+      - name: Ensure prod service is live
+        uses: google-github-actions/deploy-cloudrun@v1
+        with:
+          service: ${{ env.GCLOUD_CLOUDRUN_SERVICE }}
+          region: ${{ env.GCLOUD_REGION }}
+          tag_traffic: ${{ github.sha }}=100
+
+      - name: Print API Endpoint
         run: echo "${{ steps.deploy.outputs.url }}"

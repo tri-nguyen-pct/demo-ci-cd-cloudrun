@@ -9,7 +9,7 @@ async function bootstrap() {
   bootstrapOpenApi(app);
   const port = process.env.PORT;
   await app.listen(port, () => {
-    console.log(`Listening on port ${port}:: ...`);
+    console.log(`Listening on port ${port}: ...`);
   });
 }
 bootstrap();

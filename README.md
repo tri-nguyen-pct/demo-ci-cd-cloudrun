@@ -1,38 +1,29 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Demonstration Github Action CI/CD Gcloud Cloudrun
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+# Table of Contents
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+1. [Description](#description)
+2. [Application instruction](#application-instruction)
+   1. [Installation](#installation)
+   1. [Running the app](#running-the-app)
+3. [What I have learned](#what-i-have-learned)
+   1. [Github Action](#github-action)
+   2. [CI/CD](#ci-cd)
+   3. [GCloud Cloudrun](#gcloud)
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- A very simple NestJS application, which I use to present what I have learned about Github Action, CI/CD and Gcloud (Cloudrun)
 
-## Installation
+## Application instruction
+
+### Installation
 
 ```bash
 $ npm install
 ```
 
-## Running the app
+### Running the app
 
 ```bash
 # development
@@ -45,29 +36,64 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
-## Test
+## What I have learned
 
-```bash
-# unit tests
-$ npm run test
+### Github Action
 
-# e2e tests
-$ npm run test:e2e
+- Workflow
 
-# test coverage
-$ npm run test:cov
-```
+  - A workflow is a configurable automated process
+    - A workflow is configured by a yaml file, located in directory **_.github/workflows_** in the root of the project
+  - A workflow can be triggered by:
+    - events
+    - manually
+    - schedule
+  - A workflow can include only one job, or multiple jobs, which can run in sequently or parallel
+    - Each job is a group of commands, which tells Github Action what need to do
 
-## Support
+- Events
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+  - [Events list](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows)
 
-## Stay in touch
+  - Common events:
+    - push:
+      - [doc](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#push)
+      - run workflow when you push a commit or tag
+      - ![events-push](./assets/events-push.png)
+    - pull_request:
+      - [doc](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#pull_request)
+      - run workflow when there is an activity about pull request
+      - default activities: opened, reopened, synchronize
+      - ![events-pull-request](./assets/events-pull-request.png)
+    - workflow_run:
+      - [doc](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#workflow_run)
+      - run workflow when another workflow is requested, in_progress or completed
+      - ![events-workflow-run](./assets/events-workflow-run.png)
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+- Environments Secrets
 
-## License
+  - Environments are used to describe a general deployment target (dev, staging, prod), which includes variables and secrets
+    ![create new environment](./assets/environment-create.png)
+  - A environment has some protection rules, but I prefer using Deployment branches, with Selected branches, which means only specific branches within the project can use this environment
+  - Within a job, we can specific which environment will be used. All the Environment protection rules must pass before that job can receive the Environment. <br />
+    ![job use environment](./assets/environment-job.png)
 
-Nest is [MIT licensed](LICENSE).
+### CI CD
+
+- CI/CD (or CI/CD/CD) is a method to frequently deliver product to customer by introducing automation into development.
+
+  - CI (continuous integration): control code quality of new changes: lint, build, unit test, e2e text, ext
+
+  - CD (continuous delivery): build project and release to repository
+
+  - CD (continuous deployment): deploy result from previous CD to target environment
+
+### GCloud
+
+- Cloudrun
+  - Cloudrun is a managed compute platform that lets you run containers
+  - Can be used with any programming language like NodeJS, Golang, Python, ... as long as you can build a container from it
+  - There are two ways to run your code:
+    - Services: application lives long and listens to requests
+      - Cloudrun provide a mechanism to auto scaling base on the instance's CPU, we can set the min and max of the numbers of instances a service can scale
+    - Jobs: a job runs and quits after finishing its responsibility

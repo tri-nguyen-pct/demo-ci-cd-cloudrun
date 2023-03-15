@@ -2,6 +2,10 @@ name: CI/CD
 
 on:
   push:
+    branches:
+      - main
+      - develop
+      - feat/*
 
 permissions:
   contents: none
@@ -53,17 +57,6 @@ jobs:
         run: |-
           docker build -t gcr.io/${{ env.GCLOUD_PROJECT_ID }}/${{ env.GCLOUD_CLOUDRUN_SERVICE }}:${{  github.sha }} .
           docker push gcr.io/${{ env.GCLOUD_PROJECT_ID }}/${{ env.GCLOUD_CLOUDRUN_SERVICE }}:${{  github.sha }}
-
-      # - id: deploy
-      #   name: Deploy to Cloud Run
-      #   run: |-
-      #     gcloud run deploy ${{ env.GCLOUD_CLOUDRUN_SERVICE }} \
-      #       --region ${{ env.GCLOUD_REGION }} \
-      #       --image gcr.io/${{ env.GCLOUD_PROJECT_ID }}/${{ env.GCLOUD_CLOUDRUN_SERVICE }}:${{  github.sha }} \
-      #       --platform "managed" \
-      #       --quiet \
-      #       --allow-unauthenticated \
-      #       --memory 512M
 
       - id: deploy
         name: Deploy to Cloud Run

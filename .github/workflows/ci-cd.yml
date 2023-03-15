@@ -38,6 +38,7 @@ jobs:
       GCLOUD_REGION: ${{ vars.GCLOUD_REGION }}
       GCLOUD_IDENTITY_PROVIDER: ${{ secrets.GCLOUD_IDENTITY_PROVIDER }}
       GCLOUD_SERVICE_ACCOUNT: ${{ secrets.GCLOUD_SERVICE_ACCOUNT }}
+      GCLOUD_CLOUDRUN_SERVICE_TAG: run-${{ github.run_id }}
     steps:
       - uses: actions/checkout@v3
       - uses: 'google-github-actions/auth@v1'
@@ -72,14 +73,14 @@ jobs:
           image: gcr.io/${{ env.GCLOUD_PROJECT_ID }}/${{ env.GCLOUD_CLOUDRUN_SERVICE }}:${{  github.sha }}
           region: ${{ env.GCLOUD_REGION }}
           flags: "--allow-unauthenticated"
-          tag: ${{ github.sha }}
+          tag: ${{ env.GCLOUD_CLOUDRUN_SERVICE_TAG }}
 
       - name: Ensure prod service is live
         uses: google-github-actions/deploy-cloudrun@v1
         with:
           service: ${{ env.GCLOUD_CLOUDRUN_SERVICE }}
           region: ${{ env.GCLOUD_REGION }}
-          tag_traffic: ${{ github.sha }}=100
+          tag_traffic: ${{ env.GCLOUD_CLOUDRUN_SERVICE_TAG }}=100
 
       - name: Print API Endpoint
         run: echo "${{ steps.deploy.outputs.url }}"
